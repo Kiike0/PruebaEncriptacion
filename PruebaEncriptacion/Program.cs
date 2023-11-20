@@ -6,8 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
-using PruebaEncriptacion;
-
 
 
 static void Main()
@@ -16,123 +14,118 @@ static void Main()
 
     //crearArchivoMasCorto();
 
-    String randomPw = randomPassword(); //Contraseña random del archivo
+    string ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacion\passwordsPrueba.txt"; // Ruta del archivo a leer
 
-    //Contraseña encriptada
-    String randomPwEncriptada = encripta(randomPw);
+    // Lee las contraseñas del archivo y las almacena en una lista
+    List<string> listaPasswords = LeerPasswords(ruta);
 
-    try
-    {
-        String ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacion\passwordsPrueba.txt"; // Ruta del archivo a leer
-        int division = 0;
-        int numeroLineas = 500; //El numero de lineas que tiene el passwordsPrueba
-        division = numeroLineas / 2;
+    // Contraseña aleatoria del archivo
+    string randomPw = randomPassword(); //
 
-        // Realizamos la división del total del número de líneas y los pasamos a variables
-        division = numeroLineas / 5;
-        int parte2 = division * 2;
-        int parte3 = division * 3;
-        int parte4 = division * 4;
-        int parte5 = division * 5;
+    // Encripta la contraseña aleatoria
+    string pwEncriptado = EncriptarPassword(randomPw);
 
-        //NOTA: LAS CONTRASEÑAS ME LAS CREA BIEN PERO PASA ALGO CON LOS HILOS QUE NO FUNCIONA
+    // Intenta adivinar la contraseña mediante fuerza bruta con hilos
+    FuerzaBruta(listaPasswords, pwEncriptado);
 
-        Thread hilo1 = new Thread(() => fuerzaBruta(0, division, ruta, randomPwEncriptada));
-        hilo1.Start();
-
-        Thread hilo2 = new Thread(() => fuerzaBruta(division, parte2, ruta, randomPwEncriptada));
-        hilo2.Start();
-
-        Thread hilo3 = new Thread(() => fuerzaBruta(parte2, parte3, ruta, randomPwEncriptada));
-        hilo3.Start();
-
-        Thread hilo4 = new Thread(() => fuerzaBruta(parte3, parte4, ruta, randomPwEncriptada));
-        hilo4.Start();
-
-        Thread hilo5 = new Thread(() => fuerzaBruta(parte4, parte5, ruta, randomPwEncriptada));
-        hilo5.Start();
-    
-    } catch (Exception ex)
-    {
-        Console.WriteLine("Error en el código "+ex.ToString());
-    }
-
-    
+    Console.WriteLine("Presiona Enter para cerrar la consola...");
+    Console.ReadLine(); // Esperar entrada del usuario antes de cerrar la consola
 }
-
 
 
 /**
- * Explora una sección específica del documento mientras codifica y realiza comparaciones con una cadena proporcionada.
- * 
+ * Almacena todas las contraseñas en una lista del archivo proporcionado
+ * @param ruta la ruta de la lista de contraseñas
  */
-static void fuerzaBruta(int start, int finish, string path, string pwEncriptado)
+
+static List<string> LeerPasswords(string ruta)
 {
-    Stopwatch sw = new Stopwatch();
-    sw.Start();
-    using (StreamReader sr2 = new StreamReader(path))
+    try
     {
-        int numeroLineaActual = 0;
-        string newPw = pwEncriptado;
-        string linea2;
-        string newPw2;
-        while ((linea2 = sr2.ReadLine()) != null) // recorremos el archivo línea a línea de nuevo
-        {
-            // Si la línea actual se encuentra dentro del rango especificado, procedemos a realizar la codificación y la comparación.
-            if (Metodos.inRange(numeroLineaActual, start, finish))
-            {
-                byte[] byteLinea2 = Encoding.UTF8.GetBytes(linea2);
-                using (SHA256 sha256 = SHA256.Create())
-                {
-                    //Codificamos la línea actual
-                    byte[] hasBytes2 = sha256.ComputeHash(byteLinea2);
-                    StringBuilder sb2 = new StringBuilder();
-                    for (int i = 0; i < hasBytes2.Length; i++)
-                    {
-                        sb2.Append(hasBytes2[i].ToString("x2"));
-                    }
-                    newPw2 = sb2.ToString();
-                    //Comparamos la línea actual codificada con la contraseña dada
-                    if (newPw == newPw2)
-                    {
-                        sw.Stop();
-                        Console.WriteLine("La contraseña: ");
-                        Console.WriteLine(newPw2);
-                        Console.WriteLine("y la contraseña: ");
-                        Console.WriteLine(newPw);
-                        Console.WriteLine("coinciden, el hackeo ha sido realizado con éxito");
-                        Console.WriteLine(sw.Elapsed.ToString());
-                        break;
-                    }
-                }
-            }
-            numeroLineaActual++;
-        }
+        // Lee todas las líneas del archivo y las devuelve como una lista
+        return new List<string>(File.ReadAllLines(ruta));
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error al leer el archivo de contraseñas: " + ex.Message);
+        return new List<string>();
     }
 }
+
 
 /**
  * Encripta la contraseña que le pasamos como parámetro
- * @param contrasena la contraseña que hemos elegido para encriptar
- * 
+ * @param password string de la cadena de la contraseña que le pasamos
  */
-static string encripta(String contrasena)
+static string EncriptarPassword(string password)
 {
-    var resultado = String.Empty;
-    var convert = SHA256.Create();
-
-    var hashValue = convert.ComputeHash(Encoding.UTF8.GetBytes(contrasena));
-    foreach (byte b in hashValue)
+    using (SHA256 sha256 = SHA256.Create())
     {
-        resultado += $"{b:X2}";
-    }
+        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        StringBuilder sb = new StringBuilder();
 
-    return resultado;
+        foreach (byte b in hashBytes)
+        {
+            sb.Append(b.ToString("x2"));
+        }
+
+        return sb.ToString();
+    }
 }
 
-
 /**
- * Leer el archivo con el diccionario de contraseñas.
+ * Intenta acceder a las contraseñas por medio de 5 hilos
+ * @param listaPasswords la lista de contraseñas
+ * @param pwEncriptado la contraseña ya encriptada
+ */
+
+static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
+{
+    const int numeroHilos = 10;
+    int contraseñasPorHilo = listaPasswords.Count / numeroHilos;
+
+    // Lista para almacenar los hilos
+    List<Thread> hilos = new List<Thread>();
+
+    for (int i = 0; i < numeroHilos; i++)
+    {
+        int inicio = i * contraseñasPorHilo;
+        int fin = (i == numeroHilos - 1) ? listaPasswords.Count : (i + 1) * contraseñasPorHilo;
+
+        // Crea un hilo para la fuerza bruta en el rango asignado
+        Thread hilo = new Thread(() => RealizarFuerzaBruta(listaPasswords, pwEncriptado, inicio, fin));
+        hilos.Add(hilo);
+
+        // Inicia el hilo
+        hilo.Start();
+    }
+
+    // Espera a que todos los hilos terminen
+    foreach (Thread hilo in hilos)
+    {
+        hilo.Join();
+    }
+}
+
+static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado, int inicio, int fin)
+{
+    for (int i = inicio; i < fin; i++)
+    {
+        string pwActual = listaPasswords[i];
+
+        // Encripta la contraseña actual para comparar con la contraseña encriptada objetivo
+        string pwActualEncriptado = EncriptarPassword(pwActual);
+
+        if (pwEncriptado == pwActualEncriptado)
+        {
+            Console.WriteLine($"Contraseña encontrada: {pwActual}");
+            Console.WriteLine($"Hackeo realizado con éxito");
+            return;
+        }
+    }
+}
+/**
+ * Lee el archivo con el diccionario de contraseñas.
  */
 static void leerArchivo()
 {
@@ -208,7 +201,7 @@ static void crearArchivoMasCorto()
 /**
  * Elege una contraseña de forma aleatoria.
  */
-static String randomPassword()
+static string randomPassword()
 {
     List<string> listaPasswords = new List<string>(); //To add a list of passwords
 
@@ -216,9 +209,9 @@ static String randomPassword()
     int randomNumber = random.Next(1, 501); //The lines of passwordPrueba
                                             //We can change in another moment 101 by listaPasswords.Count+1 (the size of the list)
 
-    String line;
+    string line;
 
-    String randomPw;//To add a variabble for the random password
+    string randomPw;//To add a variabble for the random password
     try
     {
         //Pass the file path and file name to the StreamReader constructor
