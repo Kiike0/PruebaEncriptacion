@@ -25,9 +25,7 @@ Console.WriteLine(randomPw);
 // Encripta la contraseña aleatoria
 string pwEncriptado = EncriptarPassword(randomPw);
 
-var StartMoment = DateTime.Now; //Para saber cuánto tardamos en acceder a la contraseña
-FuerzaBruta(listaPasswords, pwEncriptado); // Intenta adivinar la contraseña mediante fuerza bruta con hilos
-Console.WriteLine("Se ha tardado " + (DateTime.Now - StartMoment));
+FuerzaBruta(listaPasswords, pwEncriptado, randomPw); // Intenta adivinar la contraseña mediante fuerza bruta con hilos
 
 
 
@@ -75,13 +73,15 @@ static string EncriptarPassword(string password)
  * Intenta acceder a las contraseñas por medio de hilos
  * @param listaPasswords la lista de contraseñas
  * @param pwEncriptado la contraseña ya encriptada
+ * @param randomPw la contraseña aleatoria para compararla con la encontrada
  */
 
-static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
+static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado, string randomPw)
 {
+    var StartMoment = DateTime.Now; //Para saber cuánto tardamos en acceder a la contraseña
     Console.WriteLine("Iniciando fuerza bruta...");
 
-    const int numeroHilos = 4; //Elegimos el número de hilos que queremos que se usen
+    const int numeroHilos = 10; //Elegimos el número de hilos que queremos que se usen
     int pwPorHilo = listaPasswords.Count / numeroHilos;
 
     // Lista para almacenar los hilos
@@ -102,7 +102,7 @@ static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
         }
 
         // Crea un hilo para la fuerza bruta en el rango asignado
-        Thread hilo = new Thread(() => RealizarFuerzaBruta(listaPasswords, pwEncriptado, inicio, fin));
+        Thread hilo = new Thread(() => RealizarFuerzaBruta(listaPasswords, pwEncriptado, inicio, fin, StartMoment, randomPw));
         hilos.Add(hilo);
 
         // Inicia el hilo
@@ -117,8 +117,10 @@ static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
  * @param pwEncriptado la contraseña ya encriptada
  * @param inicio indica la posición inicial en la lista de contraseñas desde la cual el hilo actual comenzará a procesar contraseñas
  * @param fin indica la posición final en la lista de contraseñas hasta la cual el hilo actual procesará contraseñas.
+ * @param StartMoment la fecha desde que se inicia el método fuerzabruta
+ * @param randomPw la contraseña aleatoria para compararla con la encontrada
  */
-static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado, int inicio, int fin)
+static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado, int inicio, int fin, DateTime StartMoment, string randomPw)
 {
     for (int i = inicio; i < fin; i++)
     {
@@ -130,7 +132,20 @@ static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado
         if (pwEncriptado == pwActualEncriptado)
         {
             Console.WriteLine($"Contraseña encontrada: {pwActual}");
-            Console.WriteLine($"Hackeo realizado con éxito");
+            
+            // Agregar comparación adicional (puedes personalizar la lógica según sea necesario)
+            if (pwActual == randomPw)
+            {
+                Console.WriteLine("La contraseña encontrada coincide con la contraseña aleatoria original.");
+                Console.WriteLine("Hackeo realizado con éxito");
+            }
+            else
+            {
+                Console.WriteLine("La contraseña encontrada NO coincide con la contraseña aleatoria original.");
+            }
+
+            
+            Console.WriteLine("Se ha tardado " + (DateTime.Now - StartMoment));
             return;
         }
     }
