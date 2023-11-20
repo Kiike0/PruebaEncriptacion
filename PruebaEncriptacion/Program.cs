@@ -71,7 +71,7 @@ static string EncriptarPassword(string password)
 }
 
 /**
- * Intenta acceder a las contraseñas por medio de 5 hilos
+ * Intenta acceder a las contraseñas por medio de hilos
  * @param listaPasswords la lista de contraseñas
  * @param pwEncriptado la contraseña ya encriptada
  */
