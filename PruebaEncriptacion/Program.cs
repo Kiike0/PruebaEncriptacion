@@ -8,29 +8,26 @@ using System.Threading;
 using System.Diagnostics;
 
 
-static void Main()
-{
-    //leerArchivo();
+//leerArchivo();
 
-    //crearArchivoMasCorto();
+//crearArchivoMasCorto();
 
-    string ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacion\passwordsPrueba.txt"; // Ruta del archivo a leer
+string ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacion\passwordsPrueba.txt"; // Ruta del archivo a leer
 
-    // Lee las contraseñas del archivo y las almacena en una lista
-    List<string> listaPasswords = LeerPasswords(ruta);
+// Lee las contraseñas del archivo y las almacena en una lista
+List<string> listaPasswords = LeerPasswords(ruta);
 
-    // Contraseña aleatoria del archivo
-    string randomPw = randomPassword(); //
+// Contraseña aleatoria del archivo
+string randomPw = randomPassword();
 
-    // Encripta la contraseña aleatoria
-    string pwEncriptado = EncriptarPassword(randomPw);
+Console.Write(randomPw+"\n");
 
-    // Intenta adivinar la contraseña mediante fuerza bruta con hilos
-    FuerzaBruta(listaPasswords, pwEncriptado);
+// Encripta la contraseña aleatoria
+string pwEncriptado = EncriptarPassword(randomPw);
 
-    Console.WriteLine("Presiona Enter para cerrar la consola...");
-    Console.ReadLine(); // Esperar entrada del usuario antes de cerrar la consola
-}
+// Intenta adivinar la contraseña mediante fuerza bruta con hilos
+FuerzaBruta(listaPasswords, pwEncriptado);
+
 
 
 /**
@@ -81,6 +78,8 @@ static string EncriptarPassword(string password)
 
 static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
 {
+    Console.WriteLine("Iniciando fuerza bruta...");
+
     const int numeroHilos = 10;
     int contraseñasPorHilo = listaPasswords.Count / numeroHilos;
 
@@ -238,10 +237,6 @@ static string randomPassword()
         randomPw = listaPasswords[randomNumber];
         //Console.WriteLine(randomPw); if we want to print it
         return randomPw;
-
-        //In spanish :XD: tenemos que encriptar esta contraseña y luego intentar acceder a ella a la fuerza bruta
-        //Después con varios hilos intentar hacer lo mismo de acceder a ella a la fuerza bruta.
-
 
         //close the file
         sr.Close();
