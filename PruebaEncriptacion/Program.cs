@@ -25,8 +25,9 @@ Console.WriteLine(randomPw);
 // Encripta la contraseña aleatoria
 string pwEncriptado = EncriptarPassword(randomPw);
 
-// Intenta adivinar la contraseña mediante fuerza bruta con hilos
-FuerzaBruta(listaPasswords, pwEncriptado);
+var StartMoment = DateTime.Now; //Para saber cuánto tardamos en acceder a la contraseña
+FuerzaBruta(listaPasswords, pwEncriptado); // Intenta adivinar la contraseña mediante fuerza bruta con hilos
+Console.WriteLine("Se ha tardado " + (DateTime.Now - StartMoment));
 
 
 
@@ -80,7 +81,7 @@ static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
 {
     Console.WriteLine("Iniciando fuerza bruta...");
 
-    const int numeroHilos = 10; //Elegimos el número de hilos que queremos que se usen
+    const int numeroHilos = 4; //Elegimos el número de hilos que queremos que se usen
     int pwPorHilo = listaPasswords.Count / numeroHilos;
 
     // Lista para almacenar los hilos
@@ -89,7 +90,16 @@ static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
     for (int i = 0; i < numeroHilos; i++)
     {
         int inicio = i * pwPorHilo;
-        int fin = (i == numeroHilos - 1) ? listaPasswords.Count : (i + 1) * pwPorHilo;
+        int fin;
+
+        if (i == numeroHilos - 1)
+        {
+            fin = listaPasswords.Count;
+        }
+        else
+        {
+            fin = (i + 1) * pwPorHilo;
+        }
 
         // Crea un hilo para la fuerza bruta en el rango asignado
         Thread hilo = new Thread(() => RealizarFuerzaBruta(listaPasswords, pwEncriptado, inicio, fin));
@@ -99,17 +109,14 @@ static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
         hilo.Start();
     }
 
-    // Espera a que todos los hilos terminen
-    foreach (Thread hilo in hilos)
-    {
-        hilo.Join();
-    }
 }
 
 /**
  * Realiza por medio de fuerza bruta el acceso a la contraseña
  * @param listaPasswords la lista de contraseñas
  * @param pwEncriptado la contraseña ya encriptada
+ * @param inicio indica la posición inicial en la lista de contraseñas desde la cual el hilo actual comenzará a procesar contraseñas
+ * @param fin indica la posición final en la lista de contraseñas hasta la cual el hilo actual procesará contraseñas.
  */
 static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado, int inicio, int fin)
 {
@@ -178,7 +185,7 @@ static void crearArchivoMasCorto()
         int lineCount = 0;
 
         //Continue to read until you reach the 500th line
-        while ((line = sr.ReadLine()) != null && lineCount < 500)
+        while ((line = sr.ReadLine()) != null && lineCount < 2000)
         {
             //write the line to new file
             sw.WriteLine(line);
