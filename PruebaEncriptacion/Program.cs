@@ -133,7 +133,7 @@ static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado
         {
             Console.WriteLine($"Contraseña encontrada: {pwActual}");
             
-            // Agregar comparación adicional (puedes personalizar la lógica según sea necesario)
+            // Comparación adicional
             if (pwActual == randomPw)
             {
                 Console.WriteLine("La contraseña encontrada coincide con la contraseña aleatoria original.");
