@@ -11,7 +11,9 @@ using System.Diagnostics;
 
 //crearArchivoMasCorto();
 
-string ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacion\passwordsPrueba.txt"; // Ruta del archivo a leer
+//string ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacion\passwordsPrueba.txt"; // Ruta del archivo editado a leer
+
+string ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacion\passwords.txt"; // Ruta del archivo completo
 
 // Lee las contraseñas del archivo y las almacena en una lista
 List<string> listaPasswords = LeerPasswords(ruta);
@@ -151,7 +153,7 @@ static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado
 }
 
 /**
- * Crea un archivo más corto por ejemplo de las 500 primeras contraseñas
+ * Crea un archivo más corto
  */
 static void crearArchivoMasCorto()
 {
