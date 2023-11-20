@@ -18,9 +18,9 @@ string ruta = @"C:\Users\enriv\source\repos\PruebaEncriptacion\PruebaEncriptacio
 List<string> listaPasswords = LeerPasswords(ruta);
 
 // Contraseña aleatoria del archivo
-string randomPw = randomPassword();
+string randomPw = randomPassword(listaPasswords);
 
-Console.Write(randomPw+"\n");
+Console.WriteLine(randomPw);
 
 // Encripta la contraseña aleatoria
 string pwEncriptado = EncriptarPassword(randomPw);
@@ -80,16 +80,16 @@ static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
 {
     Console.WriteLine("Iniciando fuerza bruta...");
 
-    const int numeroHilos = 10;
-    int contraseñasPorHilo = listaPasswords.Count / numeroHilos;
+    const int numeroHilos = 10; //Elegimos el número de hilos que queremos que se usen
+    int pwPorHilo = listaPasswords.Count / numeroHilos;
 
     // Lista para almacenar los hilos
     List<Thread> hilos = new List<Thread>();
 
     for (int i = 0; i < numeroHilos; i++)
     {
-        int inicio = i * contraseñasPorHilo;
-        int fin = (i == numeroHilos - 1) ? listaPasswords.Count : (i + 1) * contraseñasPorHilo;
+        int inicio = i * pwPorHilo;
+        int fin = (i == numeroHilos - 1) ? listaPasswords.Count : (i + 1) * pwPorHilo;
 
         // Crea un hilo para la fuerza bruta en el rango asignado
         Thread hilo = new Thread(() => RealizarFuerzaBruta(listaPasswords, pwEncriptado, inicio, fin));
@@ -106,6 +106,11 @@ static void FuerzaBruta(List<string> listaPasswords, string pwEncriptado)
     }
 }
 
+/**
+ * Realiza por medio de fuerza bruta el acceso a la contraseña
+ * @param listaPasswords la lista de contraseñas
+ * @param pwEncriptado la contraseña ya encriptada
+ */
 static void RealizarFuerzaBruta(List<string> listaPasswords, string pwEncriptado, int inicio, int fin)
 {
     for (int i = inicio; i < fin; i++)
@@ -199,57 +204,16 @@ static void crearArchivoMasCorto()
 
 /**
  * Elege una contraseña de forma aleatoria.
+ * @param listaPw le pasamos una lista de contraseñas que ya leyó en anterioridad
  */
-static string randomPassword()
+static string randomPassword(List<string> listaPw)
 {
-    List<string> listaPasswords = new List<string>(); //To add a list of passwords
-
+    // Genera un índice aleatorio para seleccionar una contraseña del listado
     Random random = new Random();
-    int randomNumber = random.Next(1, 501); //The lines of passwordPrueba
-                                            //We can change in another moment 101 by listaPasswords.Count+1 (the size of the list)
+    int indiceAleatorio = random.Next(listaPw.Count);
 
-    string line;
-
-    string randomPw;//To add a variabble for the random password
-    try
-    {
-        //Pass the file path and file name to the StreamReader constructor
-        StreamReader sr = new StreamReader("C:\\Users\\enriv\\source\\repos\\PruebaEncriptacion\\PruebaEncriptacion\\passwordsPrueba.txt");
-        //Read the first line of text
-        line = sr.ReadLine();
-        //Continue to read until you reach end of file
-        while (line != null)
-        {
-            //To add the passwords of the txt to the list
-            listaPasswords.Add(line);
-            //Read the next line
-            line = sr.ReadLine();
-        }
-
-        /** We can print all the list with this for but we dont need it
-        foreach (var elemento in listaPasswords)
-        {
-            Console.WriteLine(elemento);
-        }
-         */
-
-        //We only need a randomPassword from the list
-        randomPw = listaPasswords[randomNumber];
-        //Console.WriteLine(randomPw); if we want to print it
-        return randomPw;
-
-        //close the file
-        sr.Close();
-        Console.ReadLine();
-    }
-    catch (Exception e)
-    {
-        return "Exception: " + e.Message;
-    }
-    finally
-    {
-        Console.WriteLine("Executing finally block.");
-    }
+    // Devuelve la contraseña aleatoria seleccionada
+    return listaPw[indiceAleatorio];
 
 }
 
